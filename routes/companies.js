@@ -25,10 +25,8 @@ const router = new express.Router();
  */
 
 router.post("/", ensureLoggedIn, async function (req, res, next) {
-  console.log("REQ DOT BODY ======>", req.body)
   const validator = jsonschema.validate(req.body, companyNewSchema);
-  console.log("VALIDATOR =====>", validator)
-  
+
   if (!validator.valid) {
     const errs = validator.errors.map(e => e.stack);
     throw new BadRequestError(errs);
@@ -39,7 +37,7 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
 });
 
 /** GET /  =>
- *   { companies: [ { handle, name, description, numEmployees, logoUrl }, ...] }
+ *   { "companies": [ { "handle", "name", "description", "numEmployees", "logoUrl" }, ...] }
  *
  * Can filter on provided search filters:
  * - minEmployees
@@ -48,11 +46,20 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  *
  * Authorization required: none
  */
+// --------------------------------------------------------------- WORKING ON THIS ONE! 
+
+
 
 router.get("/", async function (req, res, next) {
-  const companies = await Company.findAll();
+  const queryArgs = req.query
+  console.log("query ====>", queryArgs)
+  const companies = await Company.findAll(); 
   return res.json({ companies });
 });
+
+
+
+
 
 /** GET /[handle]  =>  { company }
  *

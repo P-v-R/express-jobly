@@ -55,6 +55,7 @@ class Company {
    * */
 
   static async findAll() {
+    
     const companiesRes = await db.query(
         `SELECT handle,
                 name,
@@ -63,6 +64,7 @@ class Company {
                 logo_url AS "logoUrl"
            FROM companies
            ORDER BY name`);
+
     return companiesRes.rows;
   }
 
@@ -111,6 +113,7 @@ class Company {
           numEmployees: "num_employees",
           logoUrl: "logo_url",
         });
+        
     const handleVarIdx = "$" + (values.length + 1);
 
     const querySql = `

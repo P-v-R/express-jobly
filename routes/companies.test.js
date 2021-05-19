@@ -106,6 +106,27 @@ describe("GET /companies", function () {
         .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(500);
   });
+  test("filter companies by name OK", async function(){
+    // when a user passes in ?name=... to the query string it should filter the companies that meet that criteria 
+    const resp = await request(app).get(`/companies/?name=c2`);
+    expect(resp.body).toEqual({
+      companies: [{
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      }]
+    });
+  })
+  test("no companies match filter returns 404", async function(){
+    try{
+      const resp = await request(app).get(`/companies/?name=returnError`);
+    }catch(err){
+      expect(err.statusCode).toEqual(404)
+    }
+    
+  })
 });
 
 /************************************** GET /companies/:handle */
@@ -141,6 +162,8 @@ describe("GET /companies/:handle", function () {
     const resp = await request(app).get(`/companies/nope`);
     expect(resp.statusCode).toEqual(404);
   });
+
+
 });
 
 /************************************** PATCH /companies/:handle */
