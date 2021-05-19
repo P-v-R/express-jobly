@@ -26,9 +26,33 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   };
 }
 
-module.exports = { sqlForPartialUpdate };
-
-function sqlForGetFilter(queryArgs){
-  
+/** builds a WHERE clause - 
+ * intakes queryArgs from /companies GET and 
+ * returns dynamic WHERE clause
+ */
+function whereClauseBuilder(queryArgs){
+  const { name, minEmployees, maxEmployees } = queryArgs;
+  let whereList = []
+  let params = []
+  let counter = 1
+  if (name !== undefined){
+    whereString.push(`name ILIKE $${counter}`)
+    params.push(name)
+    counter++
+  }
+  if (minEmployees !== undefined){
+    whereString.push(`num_employees > $${counter}`)
+    params.push(minEmployees)
+    counter++
+  }
+  if (maxEmployees !== undefined){
+    whereString.push(`num_employees < $${counter}`)
+    params.push(maxEmployees)
+    counter++
+  }
+  let whereClause = whereList.join(" AND ")
+  return { whereClause, params}
 }
-// could we make a new function for searching different things in the GET all query . 
+
+module.exports = { sqlForPartialUpdate, whereClauseBuilder };
+

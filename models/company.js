@@ -2,7 +2,7 @@
 
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate } = require("../helpers/sql");
+const { sqlForPartialUpdate, whereClauseBuilder } = require("../helpers/sql");
 
 /** Related functions for companies. */
 
@@ -69,15 +69,27 @@ class Company {
     return companiesRes.rows;
   }
   
-  /** find all companies that match filter parameters, calls sqlForGetFilter to get formatted sql and 
+  /** find all companies that match filter parameters, 
    *  calls a tailored SQL query to match the query args 
    *  returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    */
-  static async filterAll(){
+  static async filterAll(queryArgs){
+    //if min employees is a key on setCols, do num_employees > , else < 
+    const whereClause = whereClauseBuilder(queryArgs)
+    const response = await db.query(
+      `SELECT handle,
+      name,
+      description,
+      num_employees AS "numEmployees",
+      logo_url AS "logoUrl"
+      FROM companies
+      ${whereClause}
+      ORDER BY name`, params);
 
-  }
-  // make new static filerAll()
-    // if the route has data in the query string call this isntead of find all
+      console.log(response.rows)
+      return response.rows;
+    }
+    
 
   /** Given a company handle, return data about company.
    *
