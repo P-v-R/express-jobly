@@ -1,5 +1,5 @@
 const { BadRequestError } = require("../expressError");
-
+//TODO clean up doc string for this funct
 // THIS NEEDS SOME GREAT DOCUMENTATION.
 /** Takes in data to update included in req.body and 
  * jsToSql, which is JS object key names converted to
