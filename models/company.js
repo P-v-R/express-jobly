@@ -65,8 +65,19 @@ class Company {
            FROM companies
            ORDER BY name`);
 
+    
     return companiesRes.rows;
   }
+  
+  /** find all companies that match filter parameters, calls sqlForGetFilter to get formatted sql and 
+   *  calls a tailored SQL query to match the query args 
+   *  returns [{ handle, name, description, numEmployees, logoUrl }, ...]
+   */
+  static async filterAll(){
+
+  }
+  // make new static filerAll()
+    // if the route has data in the query string call this isntead of find all
 
   /** Given a company handle, return data about company.
    *
