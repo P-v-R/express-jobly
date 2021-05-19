@@ -15,9 +15,9 @@ const companyUpdateSchema = require("../schemas/companyUpdate.json");
 const router = new express.Router();
 
 
-/** POST / { company } =>  { company }
+/** POST companies/ { company } =>  { company }
  *
- * company should be { handle, name, description, numEmployees, logoUrl }
+ * company should be { "handle", "name", "description", "numEmployees", "logoUrl" }
  *
  * Returns { handle, name, description, numEmployees, logoUrl }
  *
@@ -25,7 +25,10 @@ const router = new express.Router();
  */
 
 router.post("/", ensureLoggedIn, async function (req, res, next) {
+  console.log("REQ DOT BODY ======>", req.body)
   const validator = jsonschema.validate(req.body, companyNewSchema);
+  console.log("VALIDATOR =====>", validator)
+  
   if (!validator.valid) {
     const errs = validator.errors.map(e => e.stack);
     throw new BadRequestError(errs);
