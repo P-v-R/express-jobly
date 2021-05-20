@@ -144,7 +144,7 @@ describe("GET /companies", function () {
       }]
     });
   });
-
+  // whats going on with this false pos+ TODO
   test("no companies match filter returns 404", async function () {
     try {
       await request(app).get(`/companies/?name=returnError`);

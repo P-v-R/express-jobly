@@ -50,16 +50,21 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
 // --------------------------------------------------------------- WORKING ON THIS ONE! 
 
 
-
+// TODO update docstring to include filter into and think about how filter returns {filteredCompanies:  }
 router.get("/", async function (req, res, next) {
+
   console.log(`we made it to our companies route GET`)
+
   const queryArgs = req.query;
   // if (queryArgs) call await Company filterAll(queryArgs) and if not just call findAll and return
   console.log("query ====>", queryArgs)
+
   if (Object.keys(queryArgs).length !== 0){
+
     const filteredCompanies = await Company.filterAll(queryArgs)
     return res.json({ filteredCompanies })
   } 
+
   const companies = await Company.findAll(); 
   return res.json({ companies });
 });

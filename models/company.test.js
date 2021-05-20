@@ -31,7 +31,7 @@ describe("create", function () {
     expect(company).toEqual(newCompany);
 
     const result = await db.query(
-          `SELECT handle, name, description, num_employees, logo_url
+      `SELECT handle, name, description, num_employees, logo_url
            FROM companies
            WHERE handle = 'new'`);
     expect(result.rows).toEqual([
@@ -87,7 +87,7 @@ describe("findAll", function () {
   });
 });
 
-/******************************* filterAll() */ 
+/******************************* filterAll() */
 
 /** find all companies that match filter parameters, 
    *  calls a tailored SQL query to match the query args 
@@ -95,7 +95,7 @@ describe("findAll", function () {
    */
 describe("filterAll", function () {
   test("works: name param", async function () {
-    let companies = await Company.filterAll({name: "c1"});
+    let companies = await Company.filterAll({ name: "c1" });
     expect(companies).toEqual([
       {
         handle: "c1",
@@ -108,7 +108,7 @@ describe("filterAll", function () {
   });
 
   test("works: name param", async function () {
-    let companies = await Company.filterAll({name: "c"});
+    let companies = await Company.filterAll({ name: "c" });
     expect(companies).toEqual([
       {
         handle: "c1",
@@ -135,7 +135,7 @@ describe("filterAll", function () {
   });
 
   test("works: min/max employees", async function () {
-    let companies = await Company.filterAll({minEmployees: 2, maxEmployees: 4});
+    let companies = await Company.filterAll({ minEmployees: 2, maxEmployees: 4 });
     expect(companies).toEqual([
       {
         handle: "c2",
@@ -153,14 +153,14 @@ describe("filterAll", function () {
       }
     ]);
   });
-  
+
   test("fails: min employees is NaN", async function () {
-    try{
-      await Company.filterAll({minEmployees: "notNumber"});
-  
+    try {
+      await Company.filterAll({ minEmployees: "notNumber" });
+
       console.log("NEVER SHOULD GET TO THIS LINE");
       fail();
-    }catch(err) {
+    } catch (err) {
       expect(err instanceof BadRequestError).toBeTruthy();
     };
   });
@@ -209,7 +209,7 @@ describe("update", function () {
     });
 
     const result = await db.query(
-          `SELECT handle, name, description, num_employees, logo_url
+      `SELECT handle, name, description, num_employees, logo_url
            FROM companies
            WHERE handle = 'c1'`);
     expect(result.rows).toEqual([{
@@ -236,7 +236,7 @@ describe("update", function () {
     });
 
     const result = await db.query(
-          `SELECT handle, name, description, num_employees, logo_url
+      `SELECT handle, name, description, num_employees, logo_url
            FROM companies
            WHERE handle = 'c1'`);
     expect(result.rows).toEqual([{
@@ -273,7 +273,7 @@ describe("remove", function () {
   test("works", async function () {
     await Company.remove("c1");
     const res = await db.query(
-        "SELECT handle FROM companies WHERE handle='c1'");
+      "SELECT handle FROM companies WHERE handle='c1'");
     expect(res.rows.length).toEqual(0);
   });
 
@@ -288,59 +288,73 @@ describe("remove", function () {
 });
 
 
-/************************************ _whereClauseBuilder */  
+/************************************ _whereClauseBuilder */
 
+// TODO add some semicolons - some space formatting 
+describe("where clause builder", function () {
+  test("all three params are passed (name, minEmployees, maxEmployees)", function () {
 
-describe("where clause builder", function(){
-  test("all three params are passed (name, minEmployees, maxEmployees)", function(){
-    
-    expect(Company._whereClauseBuilder({name:"test", minEmployees:10, maxEmployees:100}))
-            .toEqual({whereClause:"name ILIKE $1 AND num_employees >= $2 AND num_employees <= $3", 
-                      params:["%test%", 10, 100]});
-    
+    expect(Company._whereClauseBuilder({ name: "test", minEmployees: 10, maxEmployees: 100 }))
+      .toEqual({
+        whereClause: "name ILIKE $1 AND num_employees >= $2 AND num_employees <= $3",
+        params: ["%test%", 10, 100]
+      });
   })
-  test("one params are passed (name)", function(){
-    expect(Company._whereClauseBuilder({name:"test"})).toEqual({whereClause:"name ILIKE $1",
-                                                      params:["%test%"]});
-    
+
+  test("one params are passed (name)", function () {
+    expect(Company._whereClauseBuilder({ name: "test" })).toEqual({
+      whereClause: "name ILIKE $1",
+      params: ["%test%"]
+    });
+
   })
-  test("one params are passed (minEmployee)", function(){
-    expect(Company._whereClauseBuilder({minEmployees:10})).toEqual({whereClause:"num_employees >= $1",
-                                                          params:[10]});
-    
+
+  test("one params are passed (minEmployee)", function () {
+    expect(Company._whereClauseBuilder({ minEmployees: 10 })).toEqual({
+      whereClause: "num_employees >= $1",
+      params: [10]
+    });
+
   })
-  test("one params are passed (maxEmployee)", function(){
-    expect(Company._whereClauseBuilder({maxEmployees:100})).toEqual({whereClause:"num_employees <= $1",
-                                                           params:[100]});
-    
+  test("one params are passed (maxEmployee)", function () {
+    expect(Company._whereClauseBuilder({ maxEmployees: 100 })).toEqual({
+      whereClause: "num_employees <= $1",
+      params: [100]
+    });
+
   })
-  test("two # employee params are passed (minEmployee, maxEmployee)", function(){
-    expect(Company._whereClauseBuilder({minEmployees:10, maxEmployees:100})).
-            toEqual({whereClause:"num_employees >= $1 AND num_employees <= $2",
-                                                          params:[10, 100]});
-    
+  test("two # employee params are passed (minEmployee, maxEmployee)", function () {
+    expect(Company._whereClauseBuilder({ minEmployees: 10, maxEmployees: 100 })).
+      toEqual({
+        whereClause: "num_employees >= $1 AND num_employees <= $2",
+        params: [10, 100]
+      });
+
   })
-  test("name and one # filter passed (name, maxEmployee)", function(){
-    expect(Company._whereClauseBuilder({name:"test", maxEmployees:100})).
-            toEqual({whereClause:"name ILIKE $1 AND num_employees <= $2",
-                                                          params:["%test%", 100]});
-    
+  test("name and one # filter passed (name, maxEmployee)", function () {
+    expect(Company._whereClauseBuilder({ name: "test", maxEmployees: 100 })).
+      toEqual({
+        whereClause: "name ILIKE $1 AND num_employees <= $2",
+        params: ["%test%", 100]
+      });
+
   })
-  test("invalid query arg returns error", function(){
-    try{
-      expect(Company._whereClauseBuilder({potato:true}));
+  // TODO clean up this test doc - failing for absense of name, min/masEmployee
+  test("invalid query arg returns error", function () {
+    try {
+      expect(Company._whereClauseBuilder({ }));
       fail();
-    } catch(err){
-      expect(err instanceof BadRequestError);
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
     }
   })
 
-  test("string passed to minEmployee", function(){
-    try{
-      expect(Company._whereClauseBuilder({minEmployees:"onehundred"}));
+  test("string passed to minEmployee", function () {
+    try {
+      expect(Company._whereClauseBuilder({ minEmployees: "onehundred" }));
       fail();
-    } catch(err){
-      expect(err instanceof BadRequestError);
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
     }
   })
 })

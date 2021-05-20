@@ -69,6 +69,7 @@ class Company {
     return companiesRes.rows;
   }
 
+    // TODO add exactly what were passing into helper func - whereClause var ==> could be tightened up
   /** find all companies that match filter parameters, 
    *  calls a tailored SQL query to match the query args 
    *  returns [{ handle, name, description, numEmployees, logoUrl }, ...]
@@ -176,7 +177,7 @@ class Company {
   /** builds a WHERE clause - 
    * intakes queryArgs from /companies GET and 
    * returns dynamic WHERE clause
-   * 
+   * // TODO update this return string
    *     in ==> {name:"test", minEmployee:0, maxEmployee: 100}
    *      returns object {whereClause: "WHERE name ILIKE '%1%' num_employees...",
    *                                     params: [name, minEmployee, maxEmployee]}
@@ -184,6 +185,7 @@ class Company {
    */
   static _whereClauseBuilder({ name, minEmployees, maxEmployees }) {
 
+    // TODO update these to be undefined NOT falsey - more detailed error message - missing ;
     // if no valid key is entered throw error
     if (!name && !minEmployees && !maxEmployees) {
       throw new BadRequestError("invalid: Key error");
@@ -209,22 +211,22 @@ class Company {
     if (name !== undefined) {
       whereList.push(`name ILIKE $${counter}`);
       params.push(`%${name}%`);
-      counter++
+      counter++;
     }
     if (minEmployees !== undefined) {
       whereList.push(`num_employees >= $${counter}`);
       params.push(+minEmployees);
-      counter++
+      counter++;
     }
     if (maxEmployees !== undefined) {
       whereList.push(`num_employees <= $${counter}`);
       params.push(+maxEmployees);
-      counter++
+      counter++;
     }
 
     let whereClause = whereList.join(" AND ");
     // console.log("WHERE CLAUSE ===>", whereClause, params)
-    return { whereClause, params } // {" ", [ ]}
+    return { whereClause, params }; // {" ", [ ]}
   }
 
 }
