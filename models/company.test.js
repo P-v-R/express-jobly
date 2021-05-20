@@ -87,6 +87,75 @@ describe("findAll", function () {
   });
 });
 
+/******************************* filterAll() */ 
+
+/** find all companies that match filter parameters, 
+   *  calls a tailored SQL query to match the query args 
+   *  returns [{ handle, name, description, numEmployees, logoUrl }, ...]
+   */
+describe("filterAll", function () {
+  test("works: name param", async function () {
+    let companies = await Company.filterAll({name: "c1"});
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+    ]);
+  });
+
+  test("works: name param", async function () {
+    let companies = await Company.filterAll({name: "c"});
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+      {
+        handle: "c3",
+        name: "C3",
+        description: "Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img",
+      }
+    ]);
+  });
+
+  test("works: min/max employees", async function () {
+    let companies = await Company.filterAll({minEmployees: 2, maxEmployees: 4});
+    expect(companies).toEqual([
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+      {
+        handle: "c3",
+        name: "C3",
+        description: "Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img",
+      }
+    ]);
+  });
+
+});
+
 /************************************** get */
 
 describe("get", function () {
@@ -206,3 +275,59 @@ describe("remove", function () {
     }
   });
 });
+
+
+/************************************ _whereClauseBuilder */  
+
+
+describe("where clause builder", function(){
+  test("all three params are passed (name, minEmployees, maxEmployees)", function(){
+    
+    expect(Company._whereClauseBuilder({name:"test", minEmployees:10, maxEmployees:100}))
+            .toEqual({whereClause:"name ILIKE $1 AND num_employees >= $2 AND num_employees <= $3", 
+                      params:["%test%", 10, 100]})
+    
+  })
+  test("one params are passed (name)", function(){
+    expect(Company._whereClauseBuilder({name:"test"})).toEqual({whereClause:"name ILIKE $1",
+                                                      params:["%test%"]})
+    
+  })
+  test("one params are passed (minEmployee)", function(){
+    expect(Company._whereClauseBuilder({minEmployees:10})).toEqual({whereClause:"num_employees >= $1",
+                                                          params:[10]})
+    
+  })
+  test("one params are passed (maxEmployee)", function(){
+    expect(Company._whereClauseBuilder({maxEmployees:100})).toEqual({whereClause:"num_employees <= $1",
+                                                           params:[100]})
+    
+  })
+  test("two # employee params are passed (minEmployee, maxEmployee)", function(){
+    expect(Company._whereClauseBuilder({minEmployees:10, maxEmployees:100})).
+            toEqual({whereClause:"num_employees >= $1 AND num_employees <= $2",
+                                                          params:[10, 100]})
+    
+  })
+  test("name and one # filter passed (name, maxEmployee)", function(){
+    expect(Company._whereClauseBuilder({name:"test", maxEmployees:100})).
+            toEqual({whereClause:"name ILIKE $1 AND num_employees <= $2",
+                                                          params:["%test%", 100]})
+    
+  })
+  test("invalid query arg returns error", function(){
+    try{
+      expect(Company._whereClauseBuilder({potato:true}))
+    } catch(err){
+      expect(err)
+    }
+  })
+  test("string passed to minEmployee", function(){
+    try{
+      expect(Company._whereClauseBuilder({minEmployee:"onehundred"}))
+    } catch(err){
+      expect(err)
+    }
+  })
+
+})

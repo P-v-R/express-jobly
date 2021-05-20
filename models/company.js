@@ -2,7 +2,7 @@
 
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate, whereClauseBuilder } = require("../helpers/sql");
+const { sqlForPartialUpdate } = require("../helpers/sql");
 
 /** Related functions for companies. */
 
@@ -74,22 +74,22 @@ class Company {
    *  returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    */
   static async filterAll(queryArgs){
-    //if min employees is a key on setCols, do num_employees > , else < 
+    const {whereClause, params} = Company._whereClauseBuilder(queryArgs)
+    console.log(`where clause is ===> `, whereClause)
+    console.log(`params are ===> `, params)
     
-    const whereClause = whereClauseBuilder(queryArgs)
-    
-    // const response = await db.query(
-    //   `SELECT handle,
-    //   name,
-    //   description,
-    //   num_employees AS "numEmployees",
-    //   logo_url AS "logoUrl"
-    //   FROM companies
-    //   ${whereClause}
-    //   ORDER BY name`, params);
+    const response = await db.query(
+      `SELECT handle,
+      name,
+      description,
+      num_employees AS "numEmployees",
+      logo_url AS "logoUrl"
+      FROM companies
+      WHERE ${whereClause}
+      ORDER BY name`, params);
 
-    //   console.log(response.rows)
-    //   return response.rows;
+      console.log(response.rows)
+      return response.rows;
   }
     
 
@@ -170,7 +170,46 @@ class Company {
 
     if (!company) throw new NotFoundError(`No company: ${handle}`);
   }
+
+
+  // ============ WHERE clause builder function called by filterAll() ===============
+  /** builds a WHERE clause - 
+   * intakes queryArgs from /companies GET and 
+   * returns dynamic WHERE clause
+   * 
+   *     in ==> {name:"test", minEmployee:0, maxEmployee: 100}
+   *      returns object {whereClause: "WHERE name ILIKE '%1%' num_employees...",
+   *                                     params: [name, minEmployee, maxEmployee]}
+   * 
+   */
+   static _whereClauseBuilder( { name, minEmployees, maxEmployees } ){
+  
+    let whereList = []
+    let params = []
+    let counter = 1
+    if (name !== undefined){
+      whereList.push(`name ILIKE $${counter}`)
+      params.push(`%${name}%`)
+      counter++
+    }
+    if (minEmployees !== undefined){
+      whereList.push(`num_employees >= $${counter}`)
+      params.push(+minEmployees)
+      counter++
+    }
+    if (maxEmployees !== undefined){
+      whereList.push(`num_employees <= $${counter}`)
+      params.push(+maxEmployees)
+      counter++
+    }
+    let whereClause = whereList.join(" AND ")
+    // console.log("WHERE LIST ====>", whereList)
+    // console.log("FUNC RESULT ", { whereClause, params})
+    return { whereClause, params } // {" ", [ ]}
+  }
 }
+
+
 
 
 module.exports = Company;

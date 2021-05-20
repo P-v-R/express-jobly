@@ -26,40 +26,6 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   };
 }
 
-/** builds a WHERE clause - 
- * intakes queryArgs from /companies GET and 
- * returns dynamic WHERE clause
- * 
- *     in ==> {name:"test", minEmployee:0, maxEmployee: 100}
- *      returns object {whereClause: "WHERE name ILIKE '%1%' num_employees...",
- *                                     params: [name, minEmployee, maxEmployee]}
- * 
- */
-function whereClauseBuilder( { name, minEmployees, maxEmployees } ){
 
-  let whereList = []
-  let params = []
-  let counter = 1
-  if (name !== undefined){
-    whereList.push(`name ILIKE '%$${counter}%'`)
-    params.push(name)
-    counter++
-  }
-  if (minEmployees !== undefined){
-    whereList.push(`num_employees > $${counter}`)
-    params.push(minEmployees)
-    counter++
-  }
-  if (maxEmployees !== undefined){
-    whereList.push(`num_employees < $${counter}`)
-    params.push(maxEmployees)
-    counter++
-  }
-  let whereClause = whereList.join(" AND ")
-  // console.log("WHERE LIST ====>", whereList)
-  // console.log("FUNC RESULT ", { whereClause, params})
-  return { whereClause, params} // {" ", [ ]}
-}
-
-module.exports = { sqlForPartialUpdate, whereClauseBuilder };
+module.exports = { sqlForPartialUpdate };
 
