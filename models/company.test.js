@@ -153,6 +153,17 @@ describe("filterAll", function () {
       }
     ]);
   });
+  
+  test("fails: min employees is NaN", async function () {
+    try{
+      await Company.filterAll({minEmployees: "notNumber"});
+  
+      console.log("NEVER SHOULD GET TO THIS LINE");
+      fail();
+    }catch(err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+    };
+  });
 
 });
 
@@ -285,49 +296,51 @@ describe("where clause builder", function(){
     
     expect(Company._whereClauseBuilder({name:"test", minEmployees:10, maxEmployees:100}))
             .toEqual({whereClause:"name ILIKE $1 AND num_employees >= $2 AND num_employees <= $3", 
-                      params:["%test%", 10, 100]})
+                      params:["%test%", 10, 100]});
     
   })
   test("one params are passed (name)", function(){
     expect(Company._whereClauseBuilder({name:"test"})).toEqual({whereClause:"name ILIKE $1",
-                                                      params:["%test%"]})
+                                                      params:["%test%"]});
     
   })
   test("one params are passed (minEmployee)", function(){
     expect(Company._whereClauseBuilder({minEmployees:10})).toEqual({whereClause:"num_employees >= $1",
-                                                          params:[10]})
+                                                          params:[10]});
     
   })
   test("one params are passed (maxEmployee)", function(){
     expect(Company._whereClauseBuilder({maxEmployees:100})).toEqual({whereClause:"num_employees <= $1",
-                                                           params:[100]})
+                                                           params:[100]});
     
   })
   test("two # employee params are passed (minEmployee, maxEmployee)", function(){
     expect(Company._whereClauseBuilder({minEmployees:10, maxEmployees:100})).
             toEqual({whereClause:"num_employees >= $1 AND num_employees <= $2",
-                                                          params:[10, 100]})
+                                                          params:[10, 100]});
     
   })
   test("name and one # filter passed (name, maxEmployee)", function(){
     expect(Company._whereClauseBuilder({name:"test", maxEmployees:100})).
             toEqual({whereClause:"name ILIKE $1 AND num_employees <= $2",
-                                                          params:["%test%", 100]})
+                                                          params:["%test%", 100]});
     
   })
   test("invalid query arg returns error", function(){
     try{
-      expect(Company._whereClauseBuilder({potato:true}))
+      expect(Company._whereClauseBuilder({potato:true}));
+      fail();
     } catch(err){
-      expect(err)
-    }
-  })
-  test("string passed to minEmployee", function(){
-    try{
-      expect(Company._whereClauseBuilder({minEmployee:"onehundred"}))
-    } catch(err){
-      expect(err)
+      expect(err instanceof BadRequestError);
     }
   })
 
+  test("string passed to minEmployee", function(){
+    try{
+      expect(Company._whereClauseBuilder({minEmployees:"onehundred"}));
+      fail();
+    } catch(err){
+      expect(err instanceof BadRequestError);
+    }
+  })
 })

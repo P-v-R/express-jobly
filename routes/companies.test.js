@@ -110,7 +110,7 @@ describe("GET /companies", function () {
     // when a user passes in ?name=... to the query string it should filter the companies that meet that criteria 
     const resp = await request(app).get(`/companies/?name=c2`);
     expect(resp.body).toEqual({
-      companies: [{
+      filteredCompanies: [{
         handle: "c2",
         name: "C2",
         description: "Desc2",
@@ -121,9 +121,9 @@ describe("GET /companies", function () {
   })
   test("filter companies by num employees multiple results OK", async function () {
     // when a user passes in ?minEmployees=... to the query string it should filter the companies that meet that criteria 
-    const resp = await request(app).get(`/companies/?minEmployees=c2`);
+    const resp = await request(app).get(`/companies/?minEmployees=2`);
     expect(resp.body).toEqual({
-      companies: [{
+      filteredCompanies: [{
         handle: "c2",
         name: "C2",
         description: "Desc2",
@@ -137,7 +137,7 @@ describe("GET /companies", function () {
         logoUrl: "http://c3.img",
       }]
     });
-  })
+  });
 
   test("no companies match filter returns 404", async function () {
     try {

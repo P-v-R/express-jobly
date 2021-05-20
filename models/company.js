@@ -18,16 +18,16 @@ class Company {
 
   static async create({ handle, name, description, numEmployees, logoUrl }) {
     const duplicateCheck = await db.query(
-        `SELECT handle
+      `SELECT handle
            FROM companies
            WHERE handle = $1`,
-        [handle]);
+      [handle]);
 
     if (duplicateCheck.rows[0])
       throw new BadRequestError(`Duplicate company: ${handle}`);
 
     const result = await db.query(
-        `INSERT INTO companies(
+      `INSERT INTO companies(
           handle,
           name,
           description,
@@ -36,13 +36,13 @@ class Company {
            VALUES
              ($1, $2, $3, $4, $5)
            RETURNING handle, name, description, num_employees AS "numEmployees", logo_url AS "logoUrl"`,
-        [
-          handle,
-          name,
-          description,
-          numEmployees,
-          logoUrl,
-        ],
+      [
+        handle,
+        name,
+        description,
+        numEmployees,
+        logoUrl,
+      ],
     );
     const company = result.rows[0];
 
@@ -55,9 +55,9 @@ class Company {
    * */
 
   static async findAll() {
-    
+
     const companiesRes = await db.query(
-        `SELECT handle,
+      `SELECT handle,
                 name,
                 description,
                 num_employees AS "numEmployees",
@@ -65,33 +65,33 @@ class Company {
            FROM companies
            ORDER BY name`);
 
-    
+
     return companiesRes.rows;
   }
-  
+
   /** find all companies that match filter parameters, 
    *  calls a tailored SQL query to match the query args 
    *  returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    */
-  static async filterAll(queryArgs){
-    const {whereClause, params} = Company._whereClauseBuilder(queryArgs)
-    console.log(`where clause is ===> `, whereClause)
-    console.log(`params are ===> `, params)
-    
+  static async filterAll(queryArgs) {
+    const { whereClause, params } = Company._whereClauseBuilder(queryArgs);
+    // console.log(`where clause is ===> `, whereClause)
+    // console.log(`params are ===> `, params)
+
     const response = await db.query(
       `SELECT handle,
-      name,
-      description,
-      num_employees AS "numEmployees",
-      logo_url AS "logoUrl"
-      FROM companies
-      WHERE ${whereClause}
-      ORDER BY name`, params);
+                name,
+                description,
+                num_employees AS "numEmployees",
+                logo_url AS "logoUrl"
+          FROM companies
+          WHERE ${whereClause}
+          ORDER BY name`, params);
 
-      console.log(response.rows)
-      return response.rows;
+    // console.log(response.rows)
+    return response.rows;
   }
-    
+
 
   /** Given a company handle, return data about company.
    *
@@ -103,14 +103,14 @@ class Company {
 
   static async get(handle) {
     const companyRes = await db.query(
-        `SELECT handle,
+      `SELECT handle,
                 name,
                 description,
                 num_employees AS "numEmployees",
                 logo_url AS "logoUrl"
            FROM companies
            WHERE handle = $1`,
-        [handle]);
+      [handle]);
 
     const company = companyRes.rows[0];
 
@@ -133,17 +133,17 @@ class Company {
 
   static async update(handle, data) {
     const { setCols, values } = sqlForPartialUpdate(
-        data,
-        {
-          numEmployees: "num_employees",
-          logoUrl: "logo_url",
-        });
-        
+      data,
+      {
+        numEmployees: "num_employees",
+        logoUrl: "logo_url",
+      });
+
     const handleVarIdx = "$" + (values.length + 1);
 
     const querySql = `
       UPDATE companies
-      SET ${setCols}
+        SET ${setCols}
         WHERE handle = ${handleVarIdx}
         RETURNING handle, name, description, num_employees AS "numEmployees", logo_url AS "logoUrl"`;
     const result = await db.query(querySql, [...values, handle]);
@@ -161,11 +161,11 @@ class Company {
 
   static async remove(handle) {
     const result = await db.query(
-        `DELETE
+      `DELETE
            FROM companies
            WHERE handle = $1
            RETURNING handle`,
-        [handle]);
+      [handle]);
     const company = result.rows[0];
 
     if (!company) throw new NotFoundError(`No company: ${handle}`);
@@ -182,31 +182,51 @@ class Company {
    *                                     params: [name, minEmployee, maxEmployee]}
    * 
    */
-   static _whereClauseBuilder( { name, minEmployees, maxEmployees } ){
-  
-    let whereList = []
-    let params = []
-    let counter = 1
-    if (name !== undefined){
-      whereList.push(`name ILIKE $${counter}`)
-      params.push(`%${name}%`)
+  static _whereClauseBuilder({ name, minEmployees, maxEmployees }) {
+
+    // if no valid key is entered throw error
+    if (!name && !minEmployees && !maxEmployees) {
+      throw new BadRequestError("invalid: Key error");
+    }
+
+    let whereList = [];
+    let params = [];
+    let counter = 1;
+
+    if (minEmployees || maxEmployees) {
+      // console.log("MIN MAX EMPLOYEES ===>", minEmployees, parseInt(minEmployees))
+
+      // if either min or maxEmployee arg is NaN throw error
+      if (isNaN(+minEmployees) && minEmployees !== undefined
+        || isNaN(+maxEmployees) && maxEmployees !== undefined) {
+
+        console.log("GOT TO ERROR THROW NAN");
+        throw new BadRequestError("invalid : min/maxEmployee");
+      }
+    }
+
+
+    if (name !== undefined) {
+      whereList.push(`name ILIKE $${counter}`);
+      params.push(`%${name}%`);
       counter++
     }
-    if (minEmployees !== undefined){
-      whereList.push(`num_employees >= $${counter}`)
-      params.push(+minEmployees)
+    if (minEmployees !== undefined) {
+      whereList.push(`num_employees >= $${counter}`);
+      params.push(+minEmployees);
       counter++
     }
-    if (maxEmployees !== undefined){
-      whereList.push(`num_employees <= $${counter}`)
-      params.push(+maxEmployees)
+    if (maxEmployees !== undefined) {
+      whereList.push(`num_employees <= $${counter}`);
+      params.push(+maxEmployees);
       counter++
     }
-    let whereClause = whereList.join(" AND ")
-    // console.log("WHERE LIST ====>", whereList)
-    // console.log("FUNC RESULT ", { whereClause, params})
+
+    let whereClause = whereList.join(" AND ");
+    // console.log("WHERE CLAUSE ===>", whereClause, params)
     return { whereClause, params } // {" ", [ ]}
   }
+
 }
 
 
