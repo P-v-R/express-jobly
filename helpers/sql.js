@@ -31,7 +31,7 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
  * returns dynamic WHERE clause
  * 
  *     in ==> {name:"test", minEmployee:0, maxEmployee: 100}
- *      returns object {whereClause: "WHERE name ILIKE '%1%' num_...",
+ *      returns object {whereClause: "WHERE name ILIKE '%1%' num_employees...",
  *                                     params: [name, minEmployee, maxEmployee]}
  * 
  */
