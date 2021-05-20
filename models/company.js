@@ -75,20 +75,22 @@ class Company {
    */
   static async filterAll(queryArgs){
     //if min employees is a key on setCols, do num_employees > , else < 
+    
     const whereClause = whereClauseBuilder(queryArgs)
-    const response = await db.query(
-      `SELECT handle,
-      name,
-      description,
-      num_employees AS "numEmployees",
-      logo_url AS "logoUrl"
-      FROM companies
-      ${whereClause}
-      ORDER BY name`, params);
+    
+    // const response = await db.query(
+    //   `SELECT handle,
+    //   name,
+    //   description,
+    //   num_employees AS "numEmployees",
+    //   logo_url AS "logoUrl"
+    //   FROM companies
+    //   ${whereClause}
+    //   ORDER BY name`, params);
 
-      console.log(response.rows)
-      return response.rows;
-    }
+    //   console.log(response.rows)
+    //   return response.rows;
+  }
     
 
   /** Given a company handle, return data about company.
