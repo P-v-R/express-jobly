@@ -1,5 +1,5 @@
 "use strict";
-const { sqlForPartialUpdate, whereClauseBuilder } = require("./sql.js")
+const { sqlForPartialUpdate } = require("./sql.js")
 const { BadRequestError } = require("../expressError");
 const { findAll } = require("../models/company.js");
 
@@ -27,7 +27,6 @@ describe("SQL for partial update", function () {
             });
           });
           
-          // TODO One of these is a false pass!!!!!!
   test("returns bad request error with no data", function () {
     try {
       sqlForPartialUpdate({}, userJsToSql);

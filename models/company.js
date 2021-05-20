@@ -69,14 +69,17 @@ class Company {
     return companiesRes.rows;
   }
 
-    // TODO add exactly what were passing into helper func - whereClause var ==> could be tightened up
   /** find all companies that match filter parameters, 
+   * filter params are obj that can include any of below: 
+   *      {name: "...", 
+   *      minEmployees: "num", 
+   *      maxEmployees: "num"}
    *  calls a tailored SQL query to match the query args 
    *  returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    */
   static async filterAll(queryArgs) {
-    const { whereClause, params } = Company._whereClauseBuilder(queryArgs);
-    // console.log(`where clause is ===> `, whereClause)
+    const { whereParamString, params } = Company._whereClauseBuilder(queryArgs);
+    // console.log(`where clause is ===> `, whereParamString)
     // console.log(`params are ===> `, params)
 
     const response = await db.query(
@@ -86,7 +89,7 @@ class Company {
                 num_employees AS "numEmployees",
                 logo_url AS "logoUrl"
           FROM companies
-          WHERE ${whereClause}
+          WHERE ${whereParamString}
           ORDER BY name`, params);
 
     // console.log(response.rows)
@@ -177,17 +180,17 @@ class Company {
   /** builds a WHERE clause - 
    * intakes queryArgs from /companies GET and 
    * returns dynamic WHERE clause
-   * // TODO update this return string
    *     in ==> {name:"test", minEmployee:0, maxEmployee: 100}
-   *      returns object {whereClause: "WHERE name ILIKE '%1%' num_employees...",
-   *                                     params: [name, minEmployee, maxEmployee]}
+   *      returns object {
+   *                    whereParamString: "name ILIKE $1 AND num_employees...",
+   *                    params: [name, minEmployee, maxEmployee]
+   *                    }
    * 
    */
   static _whereClauseBuilder({ name, minEmployees, maxEmployees }) {
 
-    // TODO update these to be undefined NOT falsey - more detailed error message - missing ;
     // if no valid key is entered throw error
-    if (!name && !minEmployees && !maxEmployees) {
+    if (name === undefined && minEmployees === undefined && maxEmployees === undefined) {
       throw new BadRequestError("invalid: Key error");
     }
 
@@ -224,9 +227,9 @@ class Company {
       counter++;
     }
 
-    let whereClause = whereList.join(" AND ");
-    // console.log("WHERE CLAUSE ===>", whereClause, params)
-    return { whereClause, params }; // {" ", [ ]}
+    let whereParamString = whereList.join(" AND ");
+    // console.log("WHERE CLAUSE ===>", whereParamString, params)
+    return { whereParamString, params }; // {" ", [ ]}
   }
 
 }

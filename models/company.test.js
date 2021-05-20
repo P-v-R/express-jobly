@@ -290,57 +290,55 @@ describe("remove", function () {
 
 /************************************ _whereClauseBuilder */
 
-// TODO add some semicolons - some space formatting 
 describe("where clause builder", function () {
   test("all three params are passed (name, minEmployees, maxEmployees)", function () {
 
     expect(Company._whereClauseBuilder({ name: "test", minEmployees: 10, maxEmployees: 100 }))
       .toEqual({
-        whereClause: "name ILIKE $1 AND num_employees >= $2 AND num_employees <= $3",
+        whereParamString: "name ILIKE $1 AND num_employees >= $2 AND num_employees <= $3",
         params: ["%test%", 10, 100]
       });
-  })
+  });
 
   test("one params are passed (name)", function () {
     expect(Company._whereClauseBuilder({ name: "test" })).toEqual({
-      whereClause: "name ILIKE $1",
+      whereParamString: "name ILIKE $1",
       params: ["%test%"]
     });
-
-  })
+  });
 
   test("one params are passed (minEmployee)", function () {
     expect(Company._whereClauseBuilder({ minEmployees: 10 })).toEqual({
-      whereClause: "num_employees >= $1",
+      whereParamString: "num_employees >= $1",
       params: [10]
     });
+  });
 
-  })
   test("one params are passed (maxEmployee)", function () {
     expect(Company._whereClauseBuilder({ maxEmployees: 100 })).toEqual({
-      whereClause: "num_employees <= $1",
+      whereParamString: "num_employees <= $1",
       params: [100]
     });
+  });
 
-  })
   test("two # employee params are passed (minEmployee, maxEmployee)", function () {
     expect(Company._whereClauseBuilder({ minEmployees: 10, maxEmployees: 100 })).
       toEqual({
-        whereClause: "num_employees >= $1 AND num_employees <= $2",
+        whereParamString: "num_employees >= $1 AND num_employees <= $2",
         params: [10, 100]
       });
+  });
 
-  })
   test("name and one # filter passed (name, maxEmployee)", function () {
     expect(Company._whereClauseBuilder({ name: "test", maxEmployees: 100 })).
       toEqual({
-        whereClause: "name ILIKE $1 AND num_employees <= $2",
+        whereParamString: "name ILIKE $1 AND num_employees <= $2",
         params: ["%test%", 100]
       });
+  });
 
-  })
-  // TODO clean up this test doc - failing for absense of name, min/masEmployee
-  test("invalid query arg returns error", function () {
+
+  test("lack of any valid query args returns error", function () {
     try {
       expect(Company._whereClauseBuilder({ }));
       fail();

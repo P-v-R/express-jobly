@@ -115,7 +115,7 @@ describe("GET /companies", function () {
     // when a user passes in ?name=... to the query string it should filter the companies that meet that criteria 
     const resp = await request(app).get(`/companies/?name=c2`);
     expect(resp.body).toEqual({
-      filteredCompanies: [{
+      companies: [{
         handle: "c2",
         name: "C2",
         description: "Desc2",
@@ -129,7 +129,7 @@ describe("GET /companies", function () {
     // when a user passes in ?minEmployees=... to the query string it should filter the companies that meet that criteria 
     const resp = await request(app).get(`/companies/?minEmployees=2`);
     expect(resp.body).toEqual({
-      filteredCompanies: [{
+      companies: [{
         handle: "c2",
         name: "C2",
         description: "Desc2",
@@ -144,15 +144,10 @@ describe("GET /companies", function () {
       }]
     });
   });
-  // whats going on with this false pos+ TODO
-  test("no companies match filter returns 404", async function () {
-    try {
-      await request(app).get(`/companies/?name=returnError`);
-      fail();
-    } catch (err) {
-      expect(err instanceof BadRequestError).toBeTruthy()
-      expect(err.statusCode).toEqual(404)
-    }
+
+  test("no companies match filter returns no match json", async function () {
+    const resp = await request(app).get(`/companies/?name=gibberishstringshouldntmatchlaksjdf`);
+      expect(resp.body).toEqual("matching company not found")
   });
 });
 

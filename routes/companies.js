@@ -47,10 +47,6 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  *
  * Authorization required: none
  */
-// --------------------------------------------------------------- WORKING ON THIS ONE! 
-
-
-// TODO update docstring to include filter into and think about how filter returns {filteredCompanies:  }
 router.get("/", async function (req, res, next) {
 
   console.log(`we made it to our companies route GET`)
@@ -61,8 +57,13 @@ router.get("/", async function (req, res, next) {
 
   if (Object.keys(queryArgs).length !== 0){
 
-    const filteredCompanies = await Company.filterAll(queryArgs)
-    return res.json({ filteredCompanies })
+    const companies = await Company.filterAll(queryArgs)
+
+    if (companies.length === 0){
+      return res.json("matching company not found")
+    }
+
+    return res.json({ companies })
   } 
 
   const companies = await Company.findAll(); 
@@ -100,7 +101,7 @@ router.patch("/:handle", ensureLoggedIn, async function (req, res, next) {
     const errs = validator.errors.map(e => e.stack);
     throw new BadRequestError(errs);
   }
-
+  console.log(`res.locals.user is ===== > `, res.locals.user)
   const company = await Company.update(req.params.handle, req.body);
   return res.json({ company });
 });
