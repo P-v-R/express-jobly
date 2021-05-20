@@ -12,6 +12,8 @@ const {
   commonAfterAll,
   u1Token,
 } = require("./_testCommon");
+const { BadRequestError } = require("../expressError");
+const { findAll } = require("../models/company");
 
 beforeAll(commonBeforeAll);
 beforeEach(commonBeforeEach);
@@ -106,6 +108,9 @@ describe("GET /companies", function () {
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(500);
   });
+
+  /***********************************GET /companies filter  */
+
   test("filter companies by name OK", async function () {
     // when a user passes in ?name=... to the query string it should filter the companies that meet that criteria 
     const resp = await request(app).get(`/companies/?name=c2`);
@@ -118,7 +123,8 @@ describe("GET /companies", function () {
         logoUrl: "http://c2.img",
       }]
     });
-  })
+  });
+
   test("filter companies by num employees multiple results OK", async function () {
     // when a user passes in ?minEmployees=... to the query string it should filter the companies that meet that criteria 
     const resp = await request(app).get(`/companies/?minEmployees=2`);
@@ -129,7 +135,7 @@ describe("GET /companies", function () {
         description: "Desc2",
         numEmployees: 2,
         logoUrl: "http://c2.img",
-      },{
+      }, {
         handle: "c3",
         name: "C3",
         description: "Desc3",
@@ -141,11 +147,13 @@ describe("GET /companies", function () {
 
   test("no companies match filter returns 404", async function () {
     try {
-      const resp = await request(app).get(`/companies/?name=returnError`);
+      await request(app).get(`/companies/?name=returnError`);
+      fail();
     } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy()
       expect(err.statusCode).toEqual(404)
     }
-  })
+  });
 });
 
 /************************************** GET /companies/:handle */
