@@ -159,7 +159,7 @@ describe("GET /users", function () {
     const resp = await request(app)
       .get("/users")
       .set("authorization", `Bearer ${adminToken}`);
-      //console.log("RESP.BODY ===> ", resp.body)
+    //console.log("RESP.BODY ===> ", resp.body)
     expect(resp.body).toEqual({
       users: [
         {
@@ -231,7 +231,22 @@ describe("GET /users", function () {
 /************************************** GET /users/:username */
 
 describe("GET /users/:username", function () {
-  test("works for users", async function () {
+  test("works for admin users", async function () {
+    const resp = await request(app)
+      .get(`/users/u1`)
+      .set("authorization", `Bearer ${adminToken}`);
+    expect(resp.body).toEqual({
+      user: {
+        username: "u1",
+        firstName: "U1F",
+        lastName: "U1L",
+        email: "user1@user.com",
+        isAdmin: false,
+      },
+    });
+  });
+
+  test("works for user if searched user is self", async function () {
     const resp = await request(app)
       .get(`/users/u1`)
       .set("authorization", `Bearer ${u1Token}`);
@@ -244,6 +259,18 @@ describe("GET /users/:username", function () {
         isAdmin: false,
       },
     });
+  });
+
+  test("401 unauthorized for user if searched user is self", async function () {
+    const resp = await request(app)
+      .get(`/users/u2`)
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.body).toEqual({
+      error: {
+        message: "Unauthorized",
+        status: 401
+      }
+    })
   });
 
   test("unauth for anon", async function () {

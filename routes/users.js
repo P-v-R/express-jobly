@@ -6,7 +6,7 @@ const jsonschema = require("jsonschema");
 
 const express = require("express");
 const { ensureLoggedIn, ensureAdmin } = require("../middleware/auth");
-const { BadRequestError } = require("../expressError");
+const { BadRequestError, UnauthorizedError } = require("../expressError");
 const User = require("../models/user");
 const { createToken } = require("../helpers/tokens");
 const userNewSchema = require("../schemas/userNew.json");
@@ -61,8 +61,15 @@ router.get("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
  **/
 
 router.get("/:username", ensureLoggedIn, async function (req, res, next) {
+  //if rec.params.username  !== req.locals.user.username || rec.locals.user.isAmin !== true
+      // return 401 unauth 
+    if(req.params.username !== req.locals.user.username || req.locals.user.isAdmin !== true){
+      throw new BadRequestError()
+    }
+
   const user = await User.get(req.params.username);
   return res.json({ user });
+  
 });
 
 

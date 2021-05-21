@@ -46,6 +46,9 @@ function ensureLoggedIn(req, res, next) {
  * If not, raises Unauthorized Error.
  */
 
+// TODO also check for non logged in users to raise unauth error 
+// write tests to show this ^^^ bug before we fix vvv this bug
+
 function ensureAdmin(req, res, next){
   try {
     if (res.locals.user.isAdmin !== true) throw new UnauthorizedError();
@@ -53,6 +56,16 @@ function ensureAdmin(req, res, next){
   } catch (err) {
     return next(err);
   }
+}
+
+/* middleware to use on routes where currentUser is same as user being 
+* (updated/deleted/viewed) OR current user is admin.
+* 
+* not raises Unauthorized
+*/ 
+
+function checkAdminOrAuthorizedUser(req, res, next){
+
 }
 
 
