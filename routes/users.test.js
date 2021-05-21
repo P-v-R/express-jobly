@@ -260,7 +260,7 @@ describe("GET /users/:username", function () {
     });
   });
 
-  test("401 unauthorized for user if searched user is self", async function () {
+  test("401 unauthorized for user if searched user is not self", async function () {
     const resp = await request(app)
       .get(`/users/u2`)
       .set("authorization", `Bearer ${u1Token}`);

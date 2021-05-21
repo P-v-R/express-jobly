@@ -64,9 +64,9 @@ function ensureAdmin(req, res, next){
 * not raises Unauthorized
 */ 
 
-function checkAdminOrAuthorizedUser(req, res, next){
+// function checkAdminOrAuthorizedUser(req, res, next){
 
-}
+// }
 
 
 module.exports = {
