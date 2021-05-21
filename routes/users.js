@@ -5,7 +5,7 @@
 const jsonschema = require("jsonschema");
 
 const express = require("express");
-const { ensureLoggedIn, ensureAdmin } = require("../middleware/auth");
+const { ensureLoggedIn, ensureAdmin, checkAdminOrAuthorizedUser } = require("../middleware/auth");
 const { BadRequestError, UnauthorizedError } = require("../expressError");
 const User = require("../models/user");
 const { createToken } = require("../helpers/tokens");
@@ -14,7 +14,7 @@ const userUpdateSchema = require("../schemas/userUpdate.json");
 
 const router = express.Router();
 
-
+//TODO change authorization lines in docstrings
 /** POST / { user }  => { user, token }
  *
  * Adds a new user. This is not the registration endpoint --- instead, this is
@@ -60,19 +60,13 @@ router.get("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
  * Authorization required: login
  **/
 
-router.get("/:username", ensureLoggedIn, async function (req, res, next) {
-  //if rec.params.username  !== req.locals.user.username || rec.locals.user.isAmin !== true
-      // return 401 unauth 
-    // if(req.params.username !== req.locals.user.username || req.locals.user.isAdmin !== true){
-    //   throw new BadRequestError()
-    // }
-  // TODO Declarative security
+router.get("/:username", ensureLoggedIn, checkAdminOrAuthorizedUser, async function (req, res, next) {
   const user = await User.get(req.params.username);
   return res.json({ user });
-  
+
 });
 
-
+//TODO - think about the ensureLoggedIn = not necessary 
 /** PATCH /[username] { user } => { user }
  *
  * Data can include:
@@ -83,7 +77,7 @@ router.get("/:username", ensureLoggedIn, async function (req, res, next) {
  * Authorization required: login
  **/
 
-router.patch("/:username", ensureLoggedIn, async function (req, res, next) {
+router.patch("/:username", ensureLoggedIn, checkAdminOrAuthorizedUser, async function (req, res, next) {
   const validator = jsonschema.validate(req.body, userUpdateSchema);
   if (!validator.valid) {
     const errs = validator.errors.map(e => e.stack);
@@ -100,7 +94,7 @@ router.patch("/:username", ensureLoggedIn, async function (req, res, next) {
  * Authorization required: login
  **/
 
-router.delete("/:username", ensureLoggedIn, async function (req, res, next) {
+router.delete("/:username", ensureLoggedIn, checkAdminOrAuthorizedUser, async function (req, res, next) {
   await User.remove(req.params.username);
   return res.json({ deleted: req.params.username });
 });

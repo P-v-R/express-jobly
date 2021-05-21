@@ -6,11 +6,13 @@ const {
   authenticateJWT,
   ensureLoggedIn,
   ensureAdmin,
+  checkAdminOrAuthorizedUser,
 } = require("./auth");
 
 
 const { SECRET_KEY } = require("../config");
 const testJwt = jwt.sign({ username: "test", isAdmin: false }, SECRET_KEY);
+const unauthUserJwt = jwt.sign({ username: "unauthorized", isAdmin: false }, SECRET_KEY);
 const badJwt = jwt.sign({ username: "test", isAdmin: false }, "wrong");
 const testAdminJwt = jwt.sign({ username: "testAdmin", isAdmin: true }, SECRET_KEY);
 
@@ -141,10 +143,50 @@ describe("ensureAdmin", function () {
     };
     ensureAdmin(req, res, next);
   });
-}) 
-
-
-// TODO write tests final middlewear func
-describe("checkAdminOrAuthorizedUser", function () {
-  
 })
+
+
+/** Tests that GET /:username routes work only for admins
+ * and users accessing their own profiles.
+ */
+describe("checkAdminOrAuthorizedUser", function () {
+  test("fails for user that is not admin or user in route/self", function () {
+    expect.assertions(1);
+    const req = { params: { username: `u2` } };
+    const res = { locals: { user: { username: 'u1', isAdmin: false } } };
+    const next = function (err) {
+      expect(err instanceof UnauthorizedError).toBeTruthy();
+    };
+    checkAdminOrAuthorizedUser(req, res, next);
+  });
+
+  test("get /:username works for user accessing self profile", function () {
+    expect.assertions(1);
+    const req = { params: { username: `u2` } };
+    const res = { locals: { user: { username: 'u2', isAdmin: false } } };
+    const next = function (err) {
+      expect(err).toBeFalsy();
+    };
+    checkAdminOrAuthorizedUser(req, res, next);
+  });
+
+  test("get /:username accessible to admins", function () {
+    expect.assertions(1);
+    const req = { params: { username: `u2` } };
+    const res = { locals: { user: { username: 'admin', isAdmin: true } } };
+    const next = function (err) {
+      expect(err).toBeFalsy();
+    };
+    checkAdminOrAuthorizedUser(req, res, next);
+  });
+  //TODO refactor for this test case 
+  test("fails for missing admin key on user", function () {
+    expect.assertions(1);
+    const req = { headers: { authorization: `Bearer ${testJwt}` } };
+    const res = { locals: { user: { username: 'test' } } };
+    const next = function (err) {
+      expect(err instanceof UnauthorizedError).toBeTruthy();
+    };
+    ensureAdmin(req, res, next);
+  });
+});

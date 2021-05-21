@@ -15,7 +15,7 @@ const { query } = require("../db");
 
 const router = new express.Router();
 
-
+//TODO update docstrings to reflect security measures/authorization needed
 /** POST companies/ { company } =>  { company }
  *
  * company should be { "handle", "name", "description", "numEmployees", "logoUrl" }
@@ -50,14 +50,14 @@ router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
  */
 router.get("/", async function (req, res, next) {
   const queryArgs = req.query;
-  
+
   // if (queryArgs) call await Company filterAll(queryArgs) and if not just call findAll and return
   if (Object.keys(queryArgs).length !== 0) {
-    const companies = await Company.filterAll(queryArgs)
+    const companies = await Company.filterAll(queryArgs);
     if (companies.length === 0) {
-      return res.json("matching company not found")
+      return res.json("matching company not found");
     }
-    return res.json({ companies })
+    return res.json({ companies });
   }
 
   const companies = await Company.findAll();
