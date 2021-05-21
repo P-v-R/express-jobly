@@ -79,8 +79,6 @@ class Company {
    */
   static async filterAll(queryArgs) {
     const { whereParamString, params } = Company._whereClauseBuilder(queryArgs);
-    // console.log(`where clause is ===> `, whereParamString)
-    // console.log(`params are ===> `, params)
 
     const response = await db.query(
       `SELECT handle,
@@ -92,7 +90,6 @@ class Company {
           WHERE ${whereParamString}
           ORDER BY name`, params);
 
-    // console.log(response.rows)
     return response.rows;
   }
 
@@ -199,13 +196,11 @@ class Company {
     let counter = 1;
 
     if (minEmployees || maxEmployees) {
-      // console.log("MIN MAX EMPLOYEES ===>", minEmployees, parseInt(minEmployees))
 
       // if either min or maxEmployee arg is NaN throw error
       if (isNaN(+minEmployees) && minEmployees !== undefined
         || isNaN(+maxEmployees) && maxEmployees !== undefined) {
 
-        console.log("GOT TO ERROR THROW NAN");
         throw new BadRequestError("invalid : min/maxEmployee");
       }
     }
@@ -228,7 +223,8 @@ class Company {
     }
 
     let whereParamString = whereList.join(" AND ");
-    // console.log("WHERE CLAUSE ===>", whereParamString, params)
+    
+    console.log("where clause generated, [params] ==>", whereParamString, params)
     return { whereParamString, params }; // {" ", [ ]}
   }
 

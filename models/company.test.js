@@ -158,7 +158,7 @@ describe("filterAll", function () {
     try {
       await Company.filterAll({ minEmployees: "notNumber" });
 
-      console.log("NEVER SHOULD GET TO THIS LINE");
+      console.alert("NEVER SHOULD GET TO THIS LINE");
       fail();
     } catch (err) {
       expect(err instanceof BadRequestError).toBeTruthy();

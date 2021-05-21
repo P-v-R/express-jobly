@@ -63,10 +63,10 @@ router.get("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
 router.get("/:username", ensureLoggedIn, async function (req, res, next) {
   //if rec.params.username  !== req.locals.user.username || rec.locals.user.isAmin !== true
       // return 401 unauth 
-    if(req.params.username !== req.locals.user.username || req.locals.user.isAdmin !== true){
-      throw new BadRequestError()
-    }
-
+    // if(req.params.username !== req.locals.user.username || req.locals.user.isAdmin !== true){
+    //   throw new BadRequestError()
+    // }
+  // TODO Declarative security
   const user = await User.get(req.params.username);
   return res.json({ user });
   

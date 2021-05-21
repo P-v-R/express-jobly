@@ -159,7 +159,6 @@ describe("GET /users", function () {
     const resp = await request(app)
       .get("/users")
       .set("authorization", `Bearer ${adminToken}`);
-    //console.log("RESP.BODY ===> ", resp.body)
     expect(resp.body).toEqual({
       users: [
         {

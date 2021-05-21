@@ -5,14 +5,13 @@ const { UnauthorizedError } = require("../expressError");
 const {
   authenticateJWT,
   ensureLoggedIn,
-  ensureAdmin,
 } = require("./auth");
 
 
 const { SECRET_KEY } = require("../config");
 const testJwt = jwt.sign({ username: "test", isAdmin: false }, SECRET_KEY);
 const badJwt = jwt.sign({ username: "test", isAdmin: false }, "wrong");
-const testAdminJwt = jwt.sign({ username: "testAdmin", isAdmin: true }, SECRET_KEY);
+
 
 describe("authenticateJWT", function () {
   test("works: via header", function () {
@@ -78,44 +77,7 @@ describe("ensureLoggedIn", function () {
   });
 });
 
-describe("ensureAdmin", function () {
-  test("works for admin", function () {
-    expect.assertions(1);
-    const req = { headers: { authorization: `Bearer ${testAdminJwt}` } };
-    const res = { locals: { user: { username: 'testAdmin', isAdmin: true } } };
-    const next = function (err) {
-      expect(err).toBeFalsy();
-    };
-    ensureAdmin(req, res, next);
-  });
 
-  test("fails for non-admin", function () {
-    expect.assertions(1);
-    const req = { headers: { authorization: `Bearer ${testJwt}` } };
-    const res = { locals: { user: { username: 'test', isAdmin: false } } };
-    const next = function (err) {
-      expect(err instanceof UnauthorizedError).toBeTruthy();
-    };
-    ensureAdmin(req, res, next);
-  });
-
-  test("fails for missing admin key on user", function () {
-    expect.assertions(1);
-    const req = { headers: { authorization: `Bearer ${testJwt}` } };
-    const res = { locals: { user: { username: 'test' } } };
-    const next = function (err) {
-      expect(err instanceof UnauthorizedError).toBeTruthy();
-    };
-    ensureAdmin(req, res, next);
-  });
-
-  test("fails for incorrect isAdmin: value", function () {
-    expect.assertions(1);
-    const req = { headers: { authorization: `Bearer ${testJwt}` } };
-    const res = { locals: { user: { username: 'test', isAdmin: 'nope' } } };
-    const next = function (err) {
-      expect(err instanceof UnauthorizedError).toBeTruthy();
-    };
-    ensureAdmin(req, res, next);
-  });
+describe("ensureLoggedInUser", function () {
+  
 })

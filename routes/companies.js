@@ -49,25 +49,18 @@ router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
  * Authorization required: none
  */
 router.get("/", async function (req, res, next) {
-
-  // console.log(`we made it to our companies route GET`)
-
   const queryArgs = req.query;
+  
   // if (queryArgs) call await Company filterAll(queryArgs) and if not just call findAll and return
-  // console.log("query ====>", queryArgs)
-
-  if (Object.keys(queryArgs).length !== 0){
-
+  if (Object.keys(queryArgs).length !== 0) {
     const companies = await Company.filterAll(queryArgs)
-
-    if (companies.length === 0){
+    if (companies.length === 0) {
       return res.json("matching company not found")
     }
-
     return res.json({ companies })
-  } 
+  }
 
-  const companies = await Company.findAll(); 
+  const companies = await Company.findAll();
   return res.json({ companies });
 });
 
@@ -103,7 +96,7 @@ router.patch("/:handle", ensureLoggedIn, ensureAdmin, async function (req, res, 
     const errs = validator.errors.map(e => e.stack);
     throw new BadRequestError(errs);
   }
-  //console.log(`res.locals.user is ===== > `, res.locals.user)
+
   const company = await Company.update(req.params.handle, req.body);
   return res.json({ company });
 });
